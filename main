@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+
+# MODIFIED VERSION OF oliverscheer/send-email-with-device-ip-address
+import socket
+import smtplib
+import os
+import sys
+import requests 
+# Import secret informations from file 'secrets.py'
+#from secrets import sender_address
+#from secrets import sender_password
+#from secrets import sender_server
+#from secrets import sender_port
+#from secrets import recipient_address 
+
+# or uncomment the following lines and set secret values here
+# sender_address = "<sender email address here>"
+# sender_password = "<sender passwort here>"
+# sender_server = 'smtp.gmail.com'
+# sender_port = 587
+# recipient_address = "<recipient address here>"
+
+def get_device_ip_address():
+
+    try: 
+        if os.name == "nt":
+            # On Windows
+            result = "Running on Windows"
+            hostname = socket.gethostname()
+            result += "\nHostname:  " + hostname
+            host = socket.gethostbyname(hostname)
+            result += "\nHost-IP-Address:" + host
+            return result
+
+        elif os.name == "posix":
+            gw = os.popen("ip -4 route show default").read().split()
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect((gw[2], 0))
+            ipaddr = s.getsockname()[0]
+            gateway = gw[2]
+            host = socket.gethostname()
+            result = "OS:\t\tRaspbian\nIP:\t\t" + ipaddr + "\nGateway:\t" + gateway + "\nHost:\t\t" + host
+            return result
+        
+        else:
+            result = os.name + " not supported yet."
+            return result
+    except:
+        return "Could not detect ip address"
+
+def send_email(text):
+    try:
+      requests.post('https://maker.ifttt.com/trigger/EVENT/with/key/YOUR_KEY_HERE', params={"value1": message,"value2":"none","value3":"none"})  
+#Replace Event with name of event and your key here with key
+    except:
+        print("failed to send email")
+
+message = get_device_ip_address()
+print(message)
+print("Sending notification, can take a while.")
+send_email(message)
+print("Done.")
+
+sys.exit()
