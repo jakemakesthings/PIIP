@@ -8,7 +8,7 @@ import sys
 import requests 
 
 
-def get_device_ip_address():
+def get_device_ip_address(): #directly from olivescheer 
 
     try: 
         if os.name == "nt":
@@ -27,26 +27,27 @@ def get_device_ip_address():
             ipaddr = s.getsockname()[0]
             gateway = gw[2]
             host = socket.gethostname()
-            result = "IP:\t\t" + ipaddr + "\nGateway:\t" + gateway
+            result = "IP:\t\t" + ipaddr + "\nGateway:\t" + gateway #this line was modified to take out hostname data and os 
             return result
         
         else:
             result = os.name + " not supported yet."
             return result
     except:
-        return "Could not detect ip address"
-
-def send_email(text):
+        return "Could not detect ip address" 
+#modifications start here 
+def send_notification(text):
     try:
       requests.post('https://maker.ifttt.com/trigger/EVENT/with/key/YOUR_KEY_HERE', params={"value1": "DEVICE CONNECTED:" ,"value2": message,"value3":"none"})  
-#Replace Event with name of event and your key here with key
+#Places event onto IFTT webhooks (Replace Event with name of event and your key here with key)
     except:
-        print("failed to send email")
+        print("failed to send notification to webhooks") #notifies user of post failure
 
-message = get_device_ip_address()
-print(message)
-print("Sending notification, can take a while.")
-send_email(message)
-print("Done.")
+message = get_device_ip_address() #runs get ip definition 
+print(message) #prints message in terminal 
+print("Sending notification, can take a while.") #notifies user that send process is starting 
+send_notification(message) #sends notification 
+print("Done.") #notifies of completion 
+
 
 sys.exit()
